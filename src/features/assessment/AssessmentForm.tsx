@@ -1,7 +1,10 @@
 import dayjs from 'dayjs';
+import { useState } from 'react';
 import {
+  Alert,
   Button,
   Checkbox,
+  Code,
   Container,
   NumberInput,
   Paper,
@@ -14,9 +17,16 @@ import { DateInput } from '@mantine/dates';
 import { schemaResolver, useForm } from '@mantine/form';
 import { emptyAssessment, type AssessmentFormValues } from './form-values';
 import { mobilityOptions } from './mobility-options';
-import { assessmentSchema } from './schema';
+import { assessmentSchema, type Assessment } from './schema';
 
-export function AssessmentForm() {
+type AssessmentFormProps = {
+  onSave: (values: Assessment) => Promise<void>;
+};
+
+export function AssessmentForm({ onSave }: AssessmentFormProps) {
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState<Assessment | null>(null);
+
   const form = useForm<AssessmentFormValues>({
     initialValues: emptyAssessment,
     validate: schemaResolver(assessmentSchema, { sync: true }),
@@ -25,14 +35,26 @@ export function AssessmentForm() {
 
   const today = dayjs().format('YYYY-MM-DD');
 
+  // onSubmit only calls this once the resolver found no errors, so parse cannot throw here.
+  const handleSubmit = async (values: AssessmentFormValues) => {
+    const parsed = assessmentSchema.parse(values);
+    setSaved(null);
+    setSaving(true);
+    try {
+      await onSave(parsed);
+      setSaved(parsed);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Container size="sm" my="xl">
       <Paper withBorder shadow="sm" p="lg" radius="md">
         <Title order={2} mb="md">
           Geriatric Care Assessment
         </Title>
-        {/* Placeholder submit handler, replaced in the next step */}
-        <form onSubmit={form.onSubmit(() => undefined)} noValidate>
+        <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
           <Stack>
             <TextInput
               label="Medical record number"
@@ -86,9 +108,16 @@ export function AssessmentForm() {
               label="Patient or representative has given consent"
               {...form.getInputProps('consentObtained', { type: 'checkbox' })}
             />
-            <Button type="submit">Save assessment</Button>
+            <Button type="submit" loading={saving} disabled={saving}>
+              Save assessment
+            </Button>
           </Stack>
         </form>
+        {saved && (
+          <Alert color="green" title="Assessment saved" mt="md">
+            <Code block>{JSON.stringify(saved, null, 2)}</Code>
+          </Alert>
+        )}
       </Paper>
     </Container>
   );

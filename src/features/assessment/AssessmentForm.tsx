@@ -12,9 +12,11 @@ import {
   Stack,
   TextInput,
   Title,
+  Group,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { schemaResolver, useForm } from '@mantine/form';
+import { sampleAssessment } from './fixtures';
 import { emptyAssessment, type AssessmentFormValues } from './form-values';
 import { mobilityOptions } from './mobility-options';
 import { assessmentSchema, type Assessment } from './schema';
@@ -46,6 +48,12 @@ export function AssessmentForm({ onSave }: AssessmentFormProps) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const loadSamplePatient = () => {
+    form.setValues(sampleAssessment);
+    form.clearErrors();
+    setSaved(null);
   };
 
   return (
@@ -97,7 +105,9 @@ export function AssessmentForm({ onSave }: AssessmentFormProps) {
             />
             <Checkbox
               label="Pharmacist review requested"
-              {...form.getInputProps('pharmacistReviewRequested', { type: 'checkbox' })}
+              {...form.getInputProps('pharmacistReviewRequested', {
+                type: 'checkbox',
+              })}
             />
             <DateInput
               label="Next review date"
@@ -108,9 +118,14 @@ export function AssessmentForm({ onSave }: AssessmentFormProps) {
               label="Patient or representative has given consent"
               {...form.getInputProps('consentObtained', { type: 'checkbox' })}
             />
-            <Button type="submit" loading={saving} disabled={saving}>
-              Save assessment
-            </Button>
+            <Group justify="space-between">
+              <Button type="button" variant="default" onClick={loadSamplePatient}>
+                Load sample patient
+              </Button>
+              <Button type="submit" loading={saving} disabled={saving}>
+                Save assessment
+              </Button>
+            </Group>
           </Stack>
         </form>
         {saved && (

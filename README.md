@@ -2,7 +2,7 @@
 
 One-page assessment form for a visiting nurse, built with React 19, TypeScript, Mantine and Zod 4.
 
-**Live:** [deployed URL]
+**Live:** https://geriatric-assessment-vansh.netlify.app
 
 ## Run it
 
@@ -25,6 +25,7 @@ One-page assessment form for a visiting nurse, built with React 19, TypeScript, 
 - The "crutches" fixture case cannot be chosen in the dropdown because it only offers valid options, so invalid mobility values are covered at schema level only.
 - After removing the unused template components there is no CSS left, so the `stylelint` script has `--allow-empty-input`. The stylelint config itself is unchanged.
 - I removed the unused template components (Welcome, ColorSchemeToggle). The template's router is left as is.
+- Deployment: Vercel's Corepack conflicts with `"type": "module"` when installing Yarn 4, so the site is built locally with `yarn build` and the `dist` folder is deployed to Netlify.
 
 ## Tests
 
